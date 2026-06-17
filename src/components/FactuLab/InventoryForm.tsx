@@ -69,10 +69,49 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+// Helper function to parse date from D(D)/M(M)/YYYY format
+const parseCustomDate = (input: string): Date | null => {
+  const regex = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+  const match = input.trim().match(regex);
+  
+  if (!match) return null;
+  
+  const day = parseInt(match[1], 10);
+  const month = parseInt(match[2], 10);
+  const year = parseInt(match[3], 10);
+  
+  // Validate date components
+  if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1900 || year > new Date().getFullYear()) {
+    return null;
+  }
+  
+  const date = new Date(year, month - 1, day);
+  
+  // Validate that the date is valid (e.g., 31/02/2020 should fail)
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+    return null;
+  }
+  
+  return date;
+};
+
+// Helper function to format date in Spanish
+const formatDateSpanish = (date: Date): string => {
+  const monthNames = [
+    "enero", "febrero", "marzo", "abril", "mayo", "junio",
+    "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+  ];
+  const day = date.getDate();
+  const month = monthNames[date.getMonth()];
+  const year = date.getFullYear();
+  return `${day} de ${month} de ${year}`;
+};
+
 export default function InventoryForm() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [lastGenerated, setLastGenerated] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [dateInput, setDateInput] = useState("");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -211,37 +250,72 @@ export default function InventoryForm() {
                         <CalendarIcon className="w-4 h-4 text-accent" />
                         Fecha del Documento
                       </FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "PPP", { locale: es })
-                              ) : (
-                                <span>Seleccionar fecha</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) =>
-                              date > new Date() || date < new Date("1900-01-01")
-                            }
-                            initialFocus
+                      <div className="space-y-2">
+                        {field.value && (
+                          <div className="text-sm font-medium text-primary p-2 bg-primary/5 rounded">
+                            {formatDateSpanish(field.value)}
+                          </div>
+                        )}
+                        <FormControl>
+                          <Input
+                            placeholder="D(D)/M(M)/YYYY (ej: 9/2/1993)"
+                            value={dateInput}
+                            onChange={(e) => {
+                              const input = e.target.value;
+                              setDateInput(input);
+                              const parsedDate = parseCustomDate(input);
+                              if (parsedDate) {
+                                field.onChange(parsedDate);
+                              }
+                            }}
+                            onBlur={() => {
+                              if (!dateInput && field.value) {
+                                setDateInput("");
+                              }
+                            }}
+                            className="bg-secondary/30"
                           />
-                        </PopoverContent>
-                      </Popover>
+                        </FormControl>
+                        <div className="flex gap-2 items-center">
+                          <div className="flex-1 h-px bg-border" />
+                          <span className="text-xs text-muted-foreground">o selecciona</span>
+                          <div className="flex-1 h-px bg-border" />
+                        </div>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant={"outline"}
+                                className={cn(
+                                  "w-full pl-3 text-left font-normal",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value ? (
+                                  format(field.value, "PPP", { locale: es })
+                                ) : (
+                                  <span>Seleccionar fecha</span>
+                                )}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={(date) => {
+                                field.onChange(date);
+                                setDateInput("");
+                              }}
+                              disabled={(date) =>
+                                date > new Date() || date < new Date("1900-01-01")
+                              }
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
