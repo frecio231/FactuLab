@@ -76,7 +76,7 @@ export const generateInventoryPDF = async (data: InventoryData) => {
   
   doc.setFontSize(10);
   doc.setTextColor(100);
-  doc.text('Sistema de Gestión de Inventario Clínico', textStartX, 28);
+  doc.text('Sistema de Facturación', textStartX, 28);
 
   // Folio & Date (Right Aligned to prevent overflow)
   const rightMargin = pageWidth - margin;
