@@ -23,6 +23,8 @@ export interface InventoryData {
   modelo: string;
   serie: string;
   folio: string;
+  pdfTitle: string;
+  pdfSubtitle: string;
   costo: number;
   ivaPorcentaje: number;
   ivaCalculado: number;
@@ -72,11 +74,13 @@ export const generateInventoryPDF = async (data: InventoryData) => {
   doc.setFont('times', 'bold');
   doc.setFontSize(22);
   doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-  doc.text('FACTULAB', textStartX, 22);
+  const titleText = data.pdfTitle ? encodeTextForPDF(data.pdfTitle.toUpperCase()) : 'FACTULAB';
+  doc.text(titleText, textStartX, 22);
   
   doc.setFontSize(10);
   doc.setTextColor(100);
-  doc.text('Sistema de Facturación', textStartX, 28);
+  const subtitleText = data.pdfSubtitle ? encodeTextForPDF(data.pdfSubtitle) : 'Sistema de Facturación';
+  doc.text(subtitleText, textStartX, 28);
 
   // Folio & Date (Right Aligned to prevent overflow)
   const rightMargin = pageWidth - margin;

@@ -57,6 +57,8 @@ const formSchema = z.object({
   modelo: z.string().min(1, { message: "El modelo es requerido." }),
   serie: z.string().min(1, { message: "El número de serie es requerido." }),
   folio: z.string().min(1, { message: "El número de factura/folio es requerido." }),
+  pdfTitle: z.string().min(1, { message: "El título del PDF es requerido." }),
+  pdfSubtitle: z.string().min(0),
   costo: z.coerce.number().min(0, { message: "El costo debe ser un número positivo." }),
   ivaPorcentaje: z.coerce.number().min(0).max(100),
   ivaCalculado: z.number(),
@@ -121,6 +123,8 @@ export default function InventoryForm() {
       modelo: "",
       serie: "",
       folio: "",
+      pdfTitle: "FACTULAB",
+      pdfSubtitle: "Sistema de Facturación",
       costo: 0,
       ivaPorcentaje: 16,
       ivaCalculado: 0,
@@ -240,7 +244,35 @@ export default function InventoryForm() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                
+
+                <FormField
+                  control={form.control}
+                  name="pdfTitle"
+                  render={({ field }) => (
+                    <FormItem className="col-span-full md:col-span-1">
+                      <FormLabel>Título del PDF (se convertirá a mayúsculas)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="FACTULAB" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="pdfSubtitle"
+                  render={({ field }) => (
+                    <FormItem className="col-span-full md:col-span-1">
+                      <FormLabel>Subtítulo del PDF</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Sistema de Facturación" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <FormField
                   control={form.control}
                   name="fecha"
