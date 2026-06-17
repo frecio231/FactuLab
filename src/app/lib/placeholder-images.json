@@ -3,9 +3,9 @@
   "placeholderImages": [
     {
       "id": "tienda-logo",
-      "description": "Logotipo de la tienda FactuLab",
-      "imageUrl": "https://picsum.photos/seed/factulab/200/200",
-      "imageHint": "medical laboratory logo"
+      "description": "Logotipo de LabSolutions",
+      "imageUrl": "/logos/labsolutions-logo.png",
+      "imageHint": "LabSolutions laboratory equipment logo"
     }
   ]
 }
